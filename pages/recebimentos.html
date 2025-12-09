@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Recebimentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 12px;
+            font-size: 24px;
+        }
+
+        #voltar {
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .lista {
+            width: 50%;
+            background-color: #e6e6e6;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .item {
+            padding: 8px 0;
+            border-bottom: 1px solid #bbb;
+        }
+
+        .botoes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .editar {
+            background-color: #00c851;
+        }
+         .pagar {
+            background-color: #007bff;
+        }
+        .excluir {
+            background-color: #ff4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a id="voltar" href="inicial.html">Voltar</a>
+        Ambos
+    </header>
+
+    <h1>Gerenciar Recebimentos</h1>
+
+    <div class="container">
+        <div class="lista">
+
+            <div class="item">
+                Antonio B., R$ 300,00 — venc: 24/11/2023
+                <input type="checkbox">
+            </div>
+
+            <div class="item">
+                Marcelo Rocha, R$ 500,00 — venc: 08/02/2023
+                <input type="checkbox">
+            </div>
+
+            <div class="item">
+                Patricia Dantas, R$ 220,00 — venc: 20/01/2023
+                <input type="checkbox">
+            </div>
+
+            <div class="item">
+                Defensoras Silva, R$ 150,00 — venc: 01/01/2023
+                <input type="checkbox">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="botoes">
+        <button class="btn editar">Editar seleção</button>
+        <button class="btn pagar">Pagar seleção</button>
+        <button class="btn excluir">Excluir seleção</button>
+    </div>
+
+</body>
+
+</html>

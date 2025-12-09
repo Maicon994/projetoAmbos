@@ -1,9 +1,51 @@
-header{
-    text-align: left;
-    background-color: orange;
-    line-height: 1.6;
-    padding: 20px;
-}
-.h1{
-    color: white;
-}
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 15px;
+            font-size: 22px;
+            text-align: left;
+        }
+
+        .h1 {
+            text-align: left;
+            font-size: 45px;
+        }
+
+        .submitbutton {
+            width: 120px;
+            background-color: #00c851;
+            color: white;;
+            margin-left: 90px;
+            font-size: 20px;
+            color: white;
+            border-radius: 8px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            
+        }
+
+        .teste-rodape {
+            text-align: center;
+            background: white;
+            top: 50px;
+        }
+
+        .caixa {
+            background-color: #d3d3d3;
+            width: 300px;
+            height: 220px;
+            margin-left: 408;
+            border-color: black;
+            align-items: center;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 38px;
+        }
+
+        .label-teste {
+            font-size: 20px;
+        }
+
+        

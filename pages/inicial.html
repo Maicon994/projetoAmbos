@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Ambos - Tela Inicial</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 15px;
+            font-size: 22px;
+            text-align: left;
+        }
+
+        header .menu {
+            float: right;
+            font-size: 16px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+
+        .box {
+            width: 28%;
+            background-color: #e6e6e6;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .box-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            background-color: #00c851;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+         #voltar {
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+    </style>
+    
+</head>
+<body>
+
+<header>
+     <a id="voltar" href="login.html">Logout</a>
+    Ambos
+</header>
+
+<h1 class="welcome">Bem-Vindo @claudio!!</h1>
+
+<div class="container">
+
+    <!-- Recebimentos Pendentes -->
+    <div class="box">
+        <div class="box-title">Recebimentos pendentes</div>
+        <p>Contas de quem está devendo vão aparecer aqui.</p>
+
+
+        <a href="recebimentos.html">
+            <button class="btn">Gerenciar</button>
+        </a>
+    </div>
+
+    <!-- Pagamentos Pendentes -->
+    <div class="box">
+        <div class="box-title">Pagamentos pendentes</div>
+        <p>Pagamentos que você não fez ou que estão pendentes vão aparecer aqui.</p>
+
+
+        <a href="pagamentos.html">
+            <button class="btn">Gerenciar</button>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
