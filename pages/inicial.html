@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <title>Ambos - Tela Inicial</title>
     <style>
-
         body {
             font-family: Arial, sans-serif;
             background-color: #ffffff;
@@ -38,11 +38,30 @@
             padding: 15px;
             border-radius: 5px;
             text-align: left;
+            min-height: 330px;
         }
 
         .box-title {
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid #bdbdbd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background: #d9d9d9;
         }
 
         .btn {
@@ -56,7 +75,8 @@
             cursor: pointer;
             font-size: 16px;
         }
-         #voltar {
+
+        #voltar {
             background: #cccccc;
             padding: 6px 10px;
             border-radius: 4px;
@@ -64,42 +84,102 @@
             text-decoration: none;
             margin-right: 10px;
         }
+
+        #cadastrar {
+            float: right;
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-left: 13px;
+        }
     </style>
-    
 </head>
+
 <body>
 
-<header>
-     <a id="voltar" href="login.html">Logout</a>
-    Ambos
-</header>
+    <header>
+        <a id="voltar" href="login.html">Logout</a>
+        <a id="cadastrar" href="cadastrarPagamentos.html">Cadastrar conta</a>
+        <a id="cadastrar" href="cadastrarRecebimentos.html">Cadastrar recebimento</a>
+        Ambos
+    </header>
 
-<h1 class="welcome">Bem-Vindo @claudio!!</h1>
+    <h1 class="welcome">Bem-Vindo @claudio!!</h1>
 
-<div class="container">
+    <div class="container">
 
-    <!-- Recebimentos Pendentes -->
-    <div class="box">
-        <div class="box-title">Recebimentos pendentes</div>
-        <p>Contas de quem está devendo vão aparecer aqui.</p>
+        <div class="box">
+            <div class="box-title">Recebimentos pendentes</div>
 
+            <div id="listaRecebimentos"></div>
 
-        <a href="recebimentos.html">
-            <button class="btn">Gerenciar</button>
-        </a>
+            <a href="recebimentos.html"><button class="btn">Gerenciar</button></a>
+        </div>
+        <div class="box">
+            <div class="box-title">Pagamentos pendentes</div>
+
+            <div id="listaPagamentos"></div>
+
+            <a href="pagamentos.html"><button class="btn">Gerenciar</button></a>
+        </div>
+
     </div>
 
-    <!-- Pagamentos Pendentes -->
-    <div class="box">
-        <div class="box-title">Pagamentos pendentes</div>
-        <p>Pagamentos que você não fez ou que estão pendentes vão aparecer aqui.</p>
+<script>
+function carregarListas() {
 
+    const recebimentos = JSON.parse(localStorage.getItem("recebimentos")) || [];
+    const pagamentos   = JSON.parse(localStorage.getItem("pagamentos"))   || [];
 
-        <a href="pagamentos.html">
-            <button class="btn">Gerenciar</button>
-        </a>
-    </div>
-</div>
+    const divReceber = document.getElementById("listaRecebimentos");
+    const divPagar   = document.getElementById("listaPagamentos");
+
+    if (recebimentos.length > 0) {
+        let tabela = `
+        <table>
+            <tr>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Data</th>
+            </tr>
+        `;
+        recebimentos.forEach(r => {
+            tabela += `
+            <tr>
+                <td>${r.nome}</td>
+                <td>R$ ${r.valor}</td>
+                <td>${r.data}</td>
+            </tr>`;
+        });
+        tabela += `</table>`;
+        divReceber.innerHTML = tabela;
+    }
+    if (pagamentos.length > 0) {
+        let tabela = `
+        <table>
+            <tr>
+                <th>Fornecedor</th>
+                <th>Item</th>
+                <th>Vencimento</th>
+            </tr>
+        `;
+        pagamentos.forEach(p => {
+            tabela += `
+            <tr>
+                <td>${p.fornecedor}</td>
+                <td>${p.item}</td>
+                <td>${p.vencimento}</td>
+            </tr>`;
+        });
+        tabela += `</table>`;
+        divPagar.innerHTML = tabela;
+    }
+}
+
+carregarListas();
+</script>
 
 </body>
 </html>

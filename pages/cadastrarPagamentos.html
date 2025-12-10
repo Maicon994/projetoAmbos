@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Pagamento</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <header>Ambos</header>
+
+    <h2>Cadastrar Pagamento</h2>
+
+    <div class="caixa" style="padding: 20px; height: auto;">
+
+        <label class="label-teste">Fornecedor:</label><br>
+        <input type="text" id="fornecedor"><br><br>
+
+        <label class="label-teste">Item:</label><br>
+        <input type="text" id="item"><br><br>
+
+        <label class="label-teste">Valor:</label><br>
+        <input type="number" id="valor"><br><br>
+
+        <label class="label-teste">Data da Compra:</label><br>
+        <input type="date" id="vencimento"><br><br>
+
+        <button class="submitbutton" onclick="salvarPagamento()">Salvar</button>
+
+    </div>
+
+    <script>
+        function salvarPagamento() {
+
+            const fornecedor = document.getElementById("fornecedor").value.trim();
+            const item = document.getElementById("item").value.trim();
+            const valor = document.getElementById("valor").value.trim();
+            const vencimento = document.getElementById("vencimento").value;
+
+            if (!fornecedor || !item || !valor || !vencimento) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            const dataVenc = new Date(vencimento);
+            const dataMin = new Date("2025-01-01");
+            const dataMax = new Date();
+
+            if (dataVenc < dataMin) {
+                alert("A data não pode ser antes de 01/01/2025.");
+                return;
+            }
+            if (dataVenc > dataMax) {
+                alert("A data não pode ser no futuro.");
+                return;
+            }
+
+            let pagamentos = JSON.parse(localStorage.getItem("pagamentos")) || [];
+
+            pagamentos.push({
+                fornecedor,
+                item,
+                valor,
+                vencimento
+            });
+
+            localStorage.setItem("pagamentos", JSON.stringify(pagamentos));
+
+            alert("Pagamento cadastrado!");
+            window.location.href = "inicial.html";
+        }
+    </script>
+
+</body>
+
+</html>
