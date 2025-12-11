@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Cadastrar Recebimento</title>
     <link rel="stylesheet" href="../css/style.css">
+
     <style>
         header {
             background-color: #ff7f27;
@@ -32,15 +33,45 @@
 
         label {
             font-weight: 600;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
 
         input[readonly] {
             background: #e9e9e9;
         }
+
+        .submitbutton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submitbutton:hover {
+            background-color: #45a049;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
     </style>
 </head>
 
 <body>
+
     <header>
         <a id="voltar" href="inicial.html">Voltar</a>
         Ambos
@@ -49,29 +80,36 @@
     <h2 style="text-align:center;">Cadastrar Recebimento</h2>
 
     <div class="caixa">
-        <label class="label-teste">Cliente:</label><br>
-        <input type="text" id="nomeCliente"><br><br>
 
-        <label class="label-teste">Item/Descrição:</label><br>
-        <input type="text" id="item"><br><br>
+        <label for="nomeCliente">Cliente:</label>
+        <input type="text" id="nomeCliente">
 
-        <label class="label-teste">Valor (R$):</label><br>
-        <input type="number" id="valor" step="0.01" min="0"><br><br>
+        <label for="item">Item/Descrição:</label>
+        <input type="text" id="item">
 
-        <label class="label-teste">Data da Compra:</label><br>
-        <input type="date" id="dataCompra"><br><br>
+        <label for="valor">Valor (R$):</label>
+        <input type="number" id="valor" step="0.01" min="0">
 
-        <label class="label-teste">Data de Vencimento:</label><br>
-        <input type="date" id="dataVencimento"><br><br>
+        <label for="dataCompra">Data da Compra:</label>
+        <input type="date" id="dataCompra">
 
-        <label class="label-teste">Juros (% por dia) — OPCIONAL (padrão 0,5% ao dia):</label><br>
-        <input type="number" id="juros" step="0.01" min="0" placeholder="Ex: 0.5"><br><br>
+        <label for="dataVencimento">Data de Vencimento:</label>
+        <input type="date" id="dataVencimento">
 
-        <label class="label-teste">Valor Final (calculado):</label><br>
-        <input type="text" id="valorFinal" readonly><br><br>
+        <!-- NOVO CAMPO -->
+        <label for="dataPagamento">Data de Pagamento:</label>
+        <input type="date" id="dataPagamento">
 
-        <button class="submitbutton" id="btnCalcular">Calcular Valor Final</button>
-        <button class="submitbutton" onclick="salvarRecebimento()" style="margin-left:10px;">Salvar</button>
+        <label for="juros">Juros (% por dia) — OPCIONAL (padrão 0,5% ao dia):</label>
+        <input type="number" id="juros" step="0.01" min="0" placeholder="Ex: 0.5">
+
+        <label for="valorFinal">Valor Final (calculado):</label>
+        <input type="text" id="valorFinal" readonly>
+
+        <div class="button-container">
+            <button class="submitbutton" id="btnCalcular">Calcular Valor Final</button>
+            <button class="submitbutton" onclick="salvarRecebimento()">Salvar</button>
+        </div>
     </div>
 
     <script>
@@ -79,49 +117,62 @@
             return Number(v).toFixed(2);
         }
 
-        function calcularValorFinal(valor, dataVencimento, jurosPercent) {
-            if (!valor || !dataVencimento) return valor || 0;
-            const hoje = new Date();
-            const venc = new Date(dataVencimento + 'T00:00:00');
-            const msPorDia = 1000 * 60 * 60 * 24;
-            let diasAtraso = Math.floor((hoje - venc) / msPorDia);
-            if (diasAtraso <= 0) return Number(valor);
-            const jurosDia = (jurosPercent === '' || jurosPercent === null || typeof jurosPercent === 'undefined')
-                ? 0.5 / 100
-                : Number(jurosPercent) / 100;
-            const valorFinal = Number(valor) * (1 + jurosDia * diasAtraso);
-            return Math.round(valorFinal * 100) / 100;
-        }
+        function calcularValorFinal(valor, dataVencimento, jurosPercent, dataPagamento) {
 
-        document.getElementById('btnCalcular').addEventListener('click', () => {
-            const valor = document.getElementById('valor').value;
-            const dataV = document.getElementById('dataVencimento').value;
-            const juros = document.getElementById('juros').value;
-            const vf = calcularValorFinal(valor, dataV, juros);
-            document.getElementById('valorFinal').value = formatMoney(vf);
+    if (!valor || !dataVencimento || !dataPagamento)
+        return Number(valor);
+
+    const venc = new Date(dataVencimento + "T00:00:00");
+    const pag = new Date(dataPagamento + "T00:00:00");
+
+    // corrigir timezone e calcular corretamente os dias
+    const msPorDia = 1000 * 60 * 60 * 24;
+    let diasAtraso = Math.floor((pag - venc) / msPorDia);
+
+    // sem atraso → valor sem juros
+    if (diasAtraso <= 0) return Number(valor);
+
+    // se juros não foi informado, usar padrão 0.5%
+    let jurosDia = jurosPercent ? Number(jurosPercent) / 100 : 0.5 / 100;
+
+    // juros simples: valor + (valor * juros * dias)
+    let valorFinal = Number(valor) * (1 + (jurosDia * diasAtraso));
+
+    return Number(valorFinal.toFixed(2));
+}
+
+        document.getElementById("btnCalcular").addEventListener("click", () => {
+
+            const valor = document.getElementById("valor").value;
+            const dataV = document.getElementById("dataVencimento").value;
+            const dataP = document.getElementById("dataPagamento").value;
+            const juros = document.getElementById("juros").value;
+
+            const vf = calcularValorFinal(valor, dataV, juros, dataP);
+
+            document.getElementById("valorFinal").value = formatMoney(vf);
         });
 
-        // salvar
+
         function salvarRecebimento() {
             const nome = document.getElementById("nomeCliente").value.trim();
             const item = document.getElementById("item").value.trim();
             const valor = document.getElementById("valor").value;
             const dataCompra = document.getElementById("dataCompra").value;
             const dataVencimento = document.getElementById("dataVencimento").value;
+            const dataPagamento = document.getElementById("dataPagamento").value;
+
             let juros = document.getElementById("juros").value;
 
-            if (!nome || !item || !valor || !dataCompra || !dataVencimento) {
-                alert("Preencha todos os campos obrigatórios!");
+            if (!nome || !item || !valor || !dataCompra || !dataVencimento || !dataPagamento) {
+                alert("Preencha todos os campos!");
                 return;
             }
 
-            if (juros === '' || juros === null || typeof juros === 'undefined') {
-                juros = 0.5; // padrão porcentual
-            } else {
-                juros = Number(juros);
-            }
+            if (!juros) juros = 0.5;
+            else juros = Number(juros);
 
-            const valorFinal = calcularValorFinal(valor, dataVencimento, juros);
+            const valorFinal = calcularValorFinal(valor, dataVencimento, juros, dataPagamento);
 
             let recebimentos = JSON.parse(localStorage.getItem("recebimentos")) || [];
 
@@ -131,9 +182,10 @@
                 valor: Number(valor),
                 dataCompra,
                 dataVencimento,
+                dataPagamento,   // <-- NOVO
                 juros,
                 valorFinal: Number(valorFinal),
-                pago: false
+                pago: true
             });
 
             localStorage.setItem("recebimentos", JSON.stringify(recebimentos));
@@ -141,6 +193,7 @@
             window.location.href = "inicial.html";
         }
     </script>
+
 </body>
 
 </html>
