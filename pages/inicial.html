@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ambos - Tela Inicial</title>
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,15 +31,17 @@
             display: flex;
             justify-content: space-around;
             margin-top: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .box {
-            width: 28%;
+            width: 380px;
             background-color: #e6e6e6;
             padding: 15px;
             border-radius: 5px;
             text-align: left;
-            min-height: 330px;
+            min-height: 200px;
         }
 
         .box-title {
@@ -54,7 +57,8 @@
             font-size: 13px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #bdbdbd;
             padding: 6px;
             text-align: left;
@@ -75,34 +79,20 @@
             cursor: pointer;
             font-size: 16px;
         }
-
-        #voltar {
-            background: #cccccc;
-            padding: 6px 10px;
-            border-radius: 4px;
-            color: #000;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-
-        #cadastrar {
-            float: right;
-            background: #cccccc;
-            padding: 6px 10px;
-            border-radius: 4px;
-            color: #000;
-            text-decoration: none;
-            margin-left: 13px;
-        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <a id="voltar" href="login.html">Logout</a>
-        <a id="cadastrar" href="cadastrarPagamentos.html">Cadastrar conta</a>
-        <a id="cadastrar" href="cadastrarRecebimentos.html">Cadastrar recebimento</a>
+        <a id="voltar" href="login.html"
+            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-right:10px;">Logout</a>
+        <a id="cadastrar" href="cadastrarPagamentos.html"
+            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-left:13px;">Cadastrar
+            conta</a>
+        <a id="cadastrar" href="cadastrarRecebimentos.html"
+            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-left:6px;">Cadastrar
+            recebimento</a>
         Ambos
     </header>
 
@@ -112,74 +102,56 @@
 
         <div class="box">
             <div class="box-title">Recebimentos pendentes</div>
-
             <div id="listaRecebimentos"></div>
-
             <a href="recebimentos.html"><button class="btn">Gerenciar</button></a>
         </div>
+
         <div class="box">
             <div class="box-title">Pagamentos pendentes</div>
-
             <div id="listaPagamentos"></div>
-
             <a href="pagamentos.html"><button class="btn">Gerenciar</button></a>
         </div>
 
     </div>
 
-<script>
-function carregarListas() {
+    <script>
+        function atualizarResumo() {
+            const recebimentos = JSON.parse(localStorage.getItem("recebimentos")) || [];
+            const pagamentos = JSON.parse(localStorage.getItem("pagamentos")) || [];
 
-    const recebimentos = JSON.parse(localStorage.getItem("recebimentos")) || [];
-    const pagamentos   = JSON.parse(localStorage.getItem("pagamentos"))   || [];
+            const divReceber = document.getElementById("listaRecebimentos");
+            const divPagar = document.getElementById("listaPagamentos");
 
-    const divReceber = document.getElementById("listaRecebimentos");
-    const divPagar   = document.getElementById("listaPagamentos");
+            // Mostrar APENAS pendentes (pago === false)
+            const recPend = recebimentos.filter(r => !r.pago);
+            const pagPend = pagamentos.filter(p => !p.pago);
 
-    if (recebimentos.length > 0) {
-        let tabela = `
-        <table>
-            <tr>
-                <th>Cliente</th>
-                <th>Valor</th>
-                <th>Data</th>
-            </tr>
-        `;
-        recebimentos.forEach(r => {
-            tabela += `
-            <tr>
-                <td>${r.nome}</td>
-                <td>R$ ${r.valor}</td>
-                <td>${r.data}</td>
-            </tr>`;
-        });
-        tabela += `</table>`;
-        divReceber.innerHTML = tabela;
-    }
-    if (pagamentos.length > 0) {
-        let tabela = `
-        <table>
-            <tr>
-                <th>Fornecedor</th>
-                <th>Item</th>
-                <th>Vencimento</th>
-            </tr>
-        `;
-        pagamentos.forEach(p => {
-            tabela += `
-            <tr>
-                <td>${p.fornecedor}</td>
-                <td>${p.item}</td>
-                <td>${p.vencimento}</td>
-            </tr>`;
-        });
-        tabela += `</table>`;
-        divPagar.innerHTML = tabela;
-    }
-}
+            if (recPend.length > 0) {
+                let tabela = `<table><tr><th>Cliente</th><th>Valor</th><th>Data</th><th>Valor Final</th></tr>`;
+                recPend.forEach(r => {
+                    tabela += `<tr><td>${r.nome}</td><td>R$ ${Number(r.valor).toFixed(2)}</td><td>${r.dataVencimento || r.data}</td><td>R$ ${Number(r.valorFinal || r.valor).toFixed(2)}</td></tr>`;
+                });
+                tabela += `</table>`;
+                divReceber.innerHTML = tabela;
+            } else {
+                divReceber.innerHTML = '<p>Nenhum recebimento pendente</p>';
+            }
 
-carregarListas();
-</script>
+            if (pagPend.length > 0) {
+                let tabela = `<table><tr><th>Fornecedor</th><th>Valor</th><th>Vencimento</th><th>Valor Final</th></tr>`;
+                pagPend.forEach(p => {
+                    tabela += `<tr><td>${p.fornecedor}</td><td>R$ ${Number(p.valor).toFixed(2)}</td><td>${p.dataVencimento}</td><td>R$ ${Number(p.valorFinal || p.valor).toFixed(2)}</td></tr>`;
+                });
+                tabela += `</table>`;
+                divPagar.innerHTML = tabela;
+            } else {
+                divPagar.innerHTML = '<p>Nenhuma conta pendente</p>';
+            }
+        }
+
+        atualizarResumo();
+    </script>
 
 </body>
+
 </html>

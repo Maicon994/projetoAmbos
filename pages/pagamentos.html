@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gerenciar Pagamentos</title>
+    <link rel="stylesheet" href="../css/style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,15 +39,28 @@
         }
 
         .lista {
-            width: 50%;
+            width: 90%;
+            max-width: 1000px;
             background-color: #e6e6e6;
             padding: 20px;
             border-radius: 5px;
         }
 
-        .item {
-            padding: 8px 0;
-            border-bottom: 1px solid #bbb;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
         }
 
         .botoes {
@@ -65,10 +79,6 @@
             border-radius: 5px;
         }
 
-        .editar {
-            background-color: #00c851;
-        }
-
         .pagar {
             background-color: #007bff;
         }
@@ -76,13 +86,17 @@
         .excluir {
             background-color: #ff4444;
         }
+
+        .pago-row {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <!-- VOLTAR FUNCIONAL -->
         <a id="voltar" href="inicial.html">Voltar</a>
         Ambos
     </header>
@@ -91,14 +105,106 @@
 
     <div class="container">
         <div class="lista">
+            <table id="tabelaPagamentos">
+                <tr>
+                    <th>Selecionar</th>
+                    <th>Fornecedor</th>
+                    <th>Valor Base</th>
+                    <th>Data Compra</th>
+                    <th>Data Vencimento</th>
+                    <th>Dias Atraso</th>
+                    <th>Juros (%/dia)</th>
+                    <th>Valor Final</th>
+                    <th>Pago?</th>
+                </tr>
+            </table>
         </div>
     </div>
 
     <div class="botoes">
-        <button class="btn editar">Editar seleção</button>
-        <button class="btn pagar">Pagar seleção</button>
-        <button class="btn excluir">Excluir seleção</button>
+        <button class="btn pagar" onclick="marcarPagamento()">Marcar como pago</button>
+        <button class="btn excluir" onclick="excluirSelecionado()">Excluir seleção</button>
     </div>
+
+    <script>
+        function diasAtrasoPara(dataVencimento) {
+            const hoje = new Date();
+            const venc = new Date(dataVencimento + 'T00:00:00');
+            const msPorDia = 1000 * 60 * 60 * 24;
+            const diff = Math.floor((hoje - venc) / msPorDia);
+            return diff > 0 ? diff : 0;
+        }
+
+        function calcularValorFinal(valor, diasAtraso, jurosPercent) {
+            if (!diasAtraso || diasAtraso <= 0) return Number(valor);
+            const jurosDia = (jurosPercent === '' || jurosPercent === undefined || jurosPercent === null) ? 0.5 / 100 : Number(jurosPercent) / 100;
+            const vf = Number(valor) * (1 + jurosDia * diasAtraso);
+            return Math.round(vf * 100) / 100;
+        }
+
+        function carregarPagamentos() {
+            const lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+            const tabela = document.getElementById("tabelaPagamentos");
+            tabela.querySelectorAll("tr.row-item")?.forEach(r => r.remove());
+
+            lista.forEach((p, index) => {
+                const dias = diasAtrasoPara(p.dataVencimento);
+                const valorFinalCalc = calcularValorFinal(p.valor, dias, p.juros);
+                p.valorFinal = valorFinalCalc;
+                tabela.insertAdjacentHTML('beforeend', `
+            <tr class="row-item ${p.pago ? 'pago-row' : ''}">
+                <td><input type="checkbox" class="check" data-index="${index}"></td>
+                <td>${p.fornecedor}</td>
+                <td>R$ ${Number(p.valor).toFixed(2)}</td>
+                <td>${p.dataCompra}</td>
+                <td>${p.dataVencimento}</td>
+                <td>${dias}</td>
+                <td>${Number(p.juros).toFixed(2)}%</td>
+                <td>R$ ${Number(valorFinalCalc).toFixed(2)}</td>
+                <td><input type="checkbox" class="paid-toggle" data-index="${index}" ${p.pago ? 'checked' : ''}></td>
+            </tr>
+        `);
+            });
+
+            localStorage.setItem("pagamentos", JSON.stringify(lista));
+            document.querySelectorAll('.paid-toggle').forEach(el => {
+                el.addEventListener('change', (e) => {
+                    const idx = Number(e.target.dataset.index);
+                    let lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+                    lista[idx].pago = e.target.checked;
+                    localStorage.setItem("pagamentos", JSON.stringify(lista));
+                    carregarPagamentos();
+                });
+            });
+        }
+
+        function getSelecionados() {
+            const checks = document.querySelectorAll(".check:checked");
+            return [...checks].map(c => parseInt(c.dataset.index));
+        }
+
+        function marcarPagamento() {
+            let lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+            const selecionados = getSelecionados();
+            if (selecionados.length === 0) { alert("Selecione ao menos 1 item."); return; }
+            selecionados.forEach(i => { if (lista[i]) lista[i].pago = true; });
+            localStorage.setItem("pagamentos", JSON.stringify(lista));
+            alert("Itens marcados como pagos.");
+            carregarPagamentos();
+        }
+
+        function excluirSelecionado() {
+            let lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+            const selecionados = getSelecionados();
+            if (selecionados.length === 0) { alert("Selecione ao menos 1 item."); return; }
+            if (!confirm("Tem certeza que deseja excluir os itens selecionados?")) return;
+            lista = lista.filter((item, index) => !selecionados.includes(index));
+            localStorage.setItem("pagamentos", JSON.stringify(lista));
+            carregarPagamentos();
+        }
+
+        carregarPagamentos();
+    </script>
 
 </body>
 

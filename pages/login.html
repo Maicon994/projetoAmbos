@@ -7,33 +7,54 @@
     <title>Login</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
 
-    <header>
-        <h1 class="h1">Ambos</h1>
-    </header>
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 12px;
+            font-size: 24px;
+        }
 
-    <div class="caixa">
-        <h2>Login</h2>
+        h1 {
+            text-align: center;
+            margin-top: 25px;
+        }
+    </style>
+    </head>
 
- <form id="loginForm">
+    <body>
 
-    <label for="username">Usuário:</label>
-    <input type="text" id="username" required>
+        <header>
+            Ambos
+        </header>
+        <div class="caixa">
+            <h2>Login</h2>
 
-    <br><br>
+            <form id="loginForm">
 
-    <label class="label-teste" for="password">Senha:</label>
-    <input type="password" id="password" required>
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" required>
 
-    <br><br>
+                <br><br>
 
-    <button class="submitbutton" type="submit">Entrar</button>
+                <label class="label-teste" for="password">Senha:</label>
+                <input type="password" id="password" required>
 
-</form>
+                <br><br>
 
-<script src="../scripts/scripts.js"></script>
-    </div>
-</body>
+                <button class="submitbutton" type="submit">Entrar</button>
+
+            </form>
+
+            <script src="../scripts/scripts.js"></script>
+        </div>
+    </body>
 
 </html>
