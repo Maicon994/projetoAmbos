@@ -19,8 +19,35 @@
             color: white;
             padding: 15px;
             font-size: 22px;
-            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .left,
+        .center,
+        .right {
+            display: flex;
+            align-items: center;
+        }
+
+        .center {
+            flex-grow: 1;
+            justify-content: left;
+            display: flex;
+            font-size: 22px;
+            margin-left: 15px;
+        }
+
+        .btn-header {
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
 
         header .menu {
             float: right;
@@ -79,22 +106,31 @@
             cursor: pointer;
             font-size: 16px;
         }
+
+        #cadastrar {
+            margin-left: 10px;
+
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <a id="voltar" href="login.html"
-            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-right:10px;">Logout</a>
-        <a id="cadastrar" href="cadastrarPagamentos.html"
-            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-left:13px;">Cadastrar
-            conta</a>
-        <a id="cadastrar" href="cadastrarRecebimentos.html"
-            style="background:#cccccc; padding:6px 10px; border-radius:4px; color:#000; text-decoration:none; margin-left:6px;">Cadastrar
-            recebimento</a>
-        Ambos
+        <div class="left">
+            <a href="login.html" class="btn-header">Logout</a>
+        </div>
+
+        <div class="center">
+            Ambos
+        </div>
+
+        <div class="right">
+            <a href="cadastrarPagamentos.html" class="btn-header">Cadastrar conta</a>
+            <a href="cadastrarRecebimentos.html" class="btn-header">Cadastrar recebimento</a>
+        </div>
     </header>
+
 
     <h1 class="welcome">Bem-Vindo @claudio!!</h1>
 

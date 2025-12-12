@@ -6,81 +6,152 @@
     <title>Gerenciar Recebimentos</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; }
-        header { background-color: #ff7f27; color: white; padding: 12px; font-size: 24px; }
-        #voltar { background: #cccccc; padding: 6px 10px; border-radius: 4px; color: #000; text-decoration: none; margin-right: 10px; }
-        h1 { text-align: center; margin-top: 25px; }
-        .container { display: flex; justify-content: center; margin-top: 25px; }
-        .lista { width: 90%; max-width: 1000px; background-color: #e6e6e6; padding: 20px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
-        th { background: #f0f0f0; }
-        .botoes { display: flex; justify-content: center; gap: 20px; margin-top: 25px; }
-        .btn { padding: 10px 25px; border: none; cursor: pointer; color: white; font-size: 16px; border-radius: 5px; }
-        .pagar { background-color: #007bff; }
-        .excluir { background-color: #ff4444; }
-        .pago-row { opacity: 0.6; text-decoration: line-through; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 12px;
+            font-size: 24px;
+        }
+
+        #voltar {
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .lista {
+            width: 90%;
+            max-width: 1000px;
+            background-color: #e6e6e6;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .botoes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .pagar {
+            background-color: #007bff;
+        }
+
+        .excluir {
+            background-color: #ff4444;
+        }
+
+        .pago-row {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
     </style>
 </head>
 
 <body>
 
-<header>
-    <a id="voltar" href="inicial.html">Voltar</a>
-    Ambos
-</header>
+    <header>
+        <a id="voltar" href="inicial.html">Voltar</a>
+        Ambos
+    </header>
 
-<h1>Gerenciar Recebimentos</h1>
+    <h1>Gerenciar Recebimentos</h1>
 
-<div class="container">
-    <div class="lista">
-        <table id="tabelaRecebimentos">
-            <tr>
-                <th>Selecionar</th>
-                <th>Cliente</th>
-                <th>Valor Base</th>
-                <th>Data Compra</th>
-                <th>Data Vencimento</th>
-                <th>Dias Atraso</th>
-                <th>Juros (%/dia)</th>
-                <th>Valor Final</th>
-                <th>Pago?</th>
-            </tr>
-        </table>
+    <div class="container">
+        <div class="lista">
+            <table id="tabelaRecebimentos">
+                <tr>
+                    <th>Selecionar</th>
+                    <th>Cliente</th>
+                    <th>Valor Base</th>
+                    <th>Data Compra</th>
+                    <th>Data Vencimento</th>
+                    <th>Dias Atraso</th>
+                    <th>Juros (%/dia)</th>
+                    <th>Valor Final</th>
+                    <th>Pago?</th>
+                </tr>
+            </table>
+        </div>
     </div>
-</div>
 
-<div class="botoes">
-    <button class="btn pagar" onclick="irParaPagamento()">Pagar selecionado</button>
-    <button class="btn excluir" onclick="excluirSelecionado()">Excluir seleção</button>
-</div>
+    <div class="botoes">
+        <button class="btn pagar" onclick="irParaPagamento()">Pagar selecionado</button>
+        <button class="btn excluir" onclick="excluirSelecionado()">Excluir seleção</button>
+    </div>
 
-<script>
-function diasAtrasoPara(dataVencimento) {
-    const hoje = new Date();
-    const venc = new Date(dataVencimento + 'T00:00:00');
-    const msPorDia = 1000 * 60 * 60 * 24;
-    const diff = Math.floor((hoje - venc) / msPorDia);
-    return diff > 0 ? diff : 0;
-}
+    <script>
+        function diasAtrasoPara(dataVencimento) {
+            const hoje = new Date();
+            const venc = new Date(dataVencimento + 'T00:00:00');
+            const msPorDia = 1000 * 60 * 60 * 24;
+            const diff = Math.floor((hoje - venc) / msPorDia);
+            return diff > 0 ? diff : 0;
+        }
 
-function calcularValorFinal(valor, diasAtraso, jurosPercent) {
-    if (!diasAtraso || diasAtraso <= 0) return Number(valor);
-    const jurosDia = (jurosPercent === '' || jurosPercent === undefined || jurosPercent === null) ? 0.5 / 100 : Number(jurosPercent) / 100;
-    return Math.round(Number(valor) * (1 + jurosDia * diasAtraso) * 100) / 100;
-}
+        function calcularValorFinal(valor, diasAtraso, jurosPercent) {
+            if (!diasAtraso || diasAtraso <= 0) return Number(valor);
+            const jurosDia = (jurosPercent === '' || jurosPercent === undefined || jurosPercent === null) ? 0.5 / 100 : Number(jurosPercent) / 100;
+            return Math.round(Number(valor) * (1 + jurosDia * diasAtraso) * 100) / 100;
+        }
 
-function carregarRecebimentos() {
-    const lista = JSON.parse(localStorage.getItem("recebimentos")) || [];
-    const tabela = document.getElementById("tabelaRecebimentos");
-    tabela.querySelectorAll("tr.row-item")?.forEach(r => r.remove());
+        function carregarRecebimentos() {
+            const lista = JSON.parse(localStorage.getItem("recebimentos")) || [];
+            const tabela = document.getElementById("tabelaRecebimentos");
+            tabela.querySelectorAll("tr.row-item")?.forEach(r => r.remove());
 
-    lista.forEach((r, index) => {
-        const dias = diasAtrasoPara(r.dataVencimento);
-        const valorFinalCalc = calcularValorFinal(r.valor, dias, r.juros);
-        r.valorFinal = valorFinalCalc;
+            lista.forEach((r, index) => {
+                const dias = diasAtrasoPara(r.dataVencimento);
+                const valorFinalCalc = calcularValorFinal(r.valor, dias, r.juros);
+                r.valorFinal = valorFinalCalc;
 
-        tabela.insertAdjacentHTML('beforeend', `
+                tabela.insertAdjacentHTML('beforeend', `
             <tr class="row-item ${r.pago ? 'pago-row' : ''}">
                 <td><input type="checkbox" class="check" data-index="${index}"></td>
                 <td>${r.nome}</td>
@@ -93,49 +164,49 @@ function carregarRecebimentos() {
                 <td><input type="checkbox" class="paid-toggle" data-index="${index}" ${r.pago ? 'checked' : ''}></td>
             </tr>
         `);
-    });
+            });
 
-    localStorage.setItem("recebimentos", JSON.stringify(lista));
+            localStorage.setItem("recebimentos", JSON.stringify(lista));
 
-    document.querySelectorAll('.paid-toggle').forEach(el => {
-        el.addEventListener('change', (e) => {
-            const idx = Number(e.target.dataset.index);
+            document.querySelectorAll('.paid-toggle').forEach(el => {
+                el.addEventListener('change', (e) => {
+                    const idx = Number(e.target.dataset.index);
+                    let lista = JSON.parse(localStorage.getItem("recebimentos")) || [];
+                    lista[idx].pago = e.target.checked;
+                    localStorage.setItem("recebimentos", JSON.stringify(lista));
+                    carregarRecebimentos();
+                });
+            });
+        }
+
+        function getSelecionados() {
+            const checks = document.querySelectorAll(".check:checked");
+            return [...checks].map(c => parseInt(c.dataset.index));
+        }
+
+        function irParaPagamento() {
+            const selecionados = getSelecionados();
+            if (selecionados.length !== 1) {
+                alert("Selecione exatamente 1 recebimento para pagar.");
+                return;
+            }
+            const idx = selecionados[0];
+            window.location.href = `pagar.html?tipo=recebimento&index=${idx}`;
+        }
+
+        function excluirSelecionado() {
             let lista = JSON.parse(localStorage.getItem("recebimentos")) || [];
-            lista[idx].pago = e.target.checked;
+            const selecionados = getSelecionados();
+            if (selecionados.length === 0) { alert("Selecione ao menos 1 item."); return; }
+            if (!confirm("Tem certeza que deseja excluir os itens selecionados?")) return;
+            lista = lista.filter((item, index) => !selecionados.includes(index));
             localStorage.setItem("recebimentos", JSON.stringify(lista));
             carregarRecebimentos();
-        });
-    });
-}
+        }
 
-function getSelecionados() {
-    const checks = document.querySelectorAll(".check:checked");
-    return [...checks].map(c => parseInt(c.dataset.index));
-}
-
-// NOVA FUNÇÃO: leva para pagar.html
-function irParaPagamento() {
-    const selecionados = getSelecionados();
-    if (selecionados.length !== 1) {
-        alert("Selecione exatamente 1 recebimento para pagar.");
-        return;
-    }
-    const idx = selecionados[0];
-    window.location.href = `pagar.html?tipo=recebimento&index=${idx}`;
-}
-
-function excluirSelecionado() {
-    let lista = JSON.parse(localStorage.getItem("recebimentos")) || [];
-    const selecionados = getSelecionados();
-    if (selecionados.length === 0) { alert("Selecione ao menos 1 item."); return; }
-    if (!confirm("Tem certeza que deseja excluir os itens selecionados?")) return;
-    lista = lista.filter((item, index) => !selecionados.includes(index));
-    localStorage.setItem("recebimentos", JSON.stringify(lista));
-    carregarRecebimentos();
-}
-
-carregarRecebimentos();
-</script>
+        carregarRecebimentos();
+    </script>
 
 </body>
+
 </html>

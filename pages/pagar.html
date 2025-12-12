@@ -223,7 +223,6 @@
 
                 alert(`Você pagou R$ ${valorParcela.toFixed(2)}. Restam R$ ${restante.toFixed(2)} para quitar totalmente.`);
 
-                // Atualiza storage
                 lista[index] = conta;
                 localStorage.setItem(tipo === 'recebimento' ? 'recebimentos' : 'pagamentos', JSON.stringify(lista));
                 window.location.reload();
