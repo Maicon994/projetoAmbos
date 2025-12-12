@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pagar Conta</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #ff7f27;
+            color: white;
+            padding: 12px;
+            font-size: 22px;
+        }
+
+        #voltar {
+            background: #cccccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #000;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #45a049;
+        }
+
+        .info {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a id="voltar" href="inicial.html">Voltar</a>
+        Pagar Conta
+    </header>
+
+    <div class="container">
+        <h2>Dados da Conta</h2>
+
+        <div id="infoConta"></div>
+
+        <label for="formaPagamento">Forma de Pagamento:</label>
+        <select id="formaPagamento">
+            <option value="dinheiro">Dinheiro</option>
+            <option value="cartao">Cartão</option>
+            <option value="pix">PIX</option>
+            <option value="parcelado">Parcelado</option>
+        </select>
+
+        <div id="parcelasDiv" style="display:none;">
+            <label for="numParcelas">Número de parcelas (max 6):</label>
+            <select id="numParcelas">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+
+            <label for="parcelaSelecionada">Qual parcela você vai pagar:</label>
+            <select id="parcelaSelecionada">
+                <option value="1">Parcela 1</option>
+            </select>
+        </div>
+
+        <label for="dataPagamento">Data do Pagamento:</label>
+        <input type="date" id="dataPagamento" value="">
+
+        <div class="info" id="valorInfo"></div>
+
+        <button class="btn" onclick="finalizarPagamento()">Finalizar Pagamento</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const tipo = urlParams.get('tipo'); // 'recebimento' ou 'pagamento'
+        const index = Number(urlParams.get('index'));
+        let lista = JSON.parse(localStorage.getItem(tipo === 'recebimento' ? 'recebimentos' : 'pagamentos')) || [];
+        let conta = lista[index];
+
+        const infoContaDiv = document.getElementById("infoConta");
+        const formaPagamento = document.getElementById("formaPagamento");
+        const parcelasDiv = document.getElementById("parcelasDiv");
+        const numParcelas = document.getElementById("numParcelas");
+        const parcelaSelecionada = document.getElementById("parcelaSelecionada");
+        const dataPagamento = document.getElementById("dataPagamento");
+        const valorInfo = document.getElementById("valorInfo");
+
+        // Inicializa
+        function init() {
+            if (!conta) {
+                alert("Conta não encontrada!");
+                window.location.href = "inicial.html";
+                return;
+            }
+
+            infoContaDiv.innerHTML = `
+                <p><strong>Cliente/Fornecedor:</strong> ${conta.nome || conta.fornecedor}</p>
+                <p><strong>Valor Base:</strong> R$ ${conta.valor.toFixed(2)}</p>
+                <p><strong>Data Vencimento:</strong> ${conta.dataVencimento}</p>
+                <p><strong>Juros (%/dia):</strong> ${conta.juros || 0.5}</p>
+            `;
+
+            // Ajusta data para hoje por padrão
+            const hoje = new Date();
+            dataPagamento.value = hoje.toISOString().split('T')[0];
+
+            atualizarValor();
+        }
+
+        formaPagamento.addEventListener('change', () => {
+            if (formaPagamento.value === 'parcelado') {
+                parcelasDiv.style.display = 'block';
+                atualizarParcelas();
+            } else {
+                parcelasDiv.style.display = 'none';
+            }
+            atualizarValor();
+        });
+
+        numParcelas.addEventListener('change', atualizarParcelas);
+        parcelaSelecionada.addEventListener('change', atualizarValor);
+        dataPagamento.addEventListener('change', atualizarValor);
+
+        function atualizarParcelas() {
+            const n = Number(numParcelas.value);
+            parcelaSelecionada.innerHTML = '';
+            for (let i = 1; i <= n; i++) {
+                parcelaSelecionada.innerHTML += `<option value="${i}">Parcela ${i}</option>`;
+            }
+            atualizarValor();
+        }
+
+        function diasAtraso(vencimento, hoje) {
+            const ven = new Date(vencimento + 'T00:00:00');
+            const diff = Math.floor((hoje - ven) / (1000 * 60 * 60 * 24));
+            return diff > 0 ? diff : 0;
+        }
+
+        function calcularValorFinal(valor, diasAtraso, jurosPercent) {
+            const jurosDia = (jurosPercent === '' || jurosPercent === undefined || jurosPercent === null) ? 0.5 / 100 : Number(jurosPercent) / 100;
+            if (!diasAtraso || diasAtraso <= 0) return Number(valor);
+            return Math.round((Number(valor) * (1 + jurosDia * diasAtraso)) * 100) / 100;
+        }
+
+        function atualizarValor() {
+            const hoje = new Date(dataPagamento.value);
+            const atraso = diasAtraso(conta.dataVencimento, hoje);
+            const valorComJuros = calcularValorFinal(conta.valor, atraso, conta.juros);
+
+            if (formaPagamento.value === 'parcelado') {
+                const totalParcelas = Number(numParcelas.value);
+                const valorParcela = Math.round((valorComJuros / totalParcelas) * 100) / 100;
+                valorInfo.innerHTML = `Valor total: R$ ${valorComJuros.toFixed(2)}<br>Parcela selecionada: ${parcelaSelecionada.value} / ${totalParcelas} <br>Valor desta parcela: R$ ${valorParcela.toFixed(2)}`;
+            } else {
+                valorInfo.innerHTML = `Valor total a pagar: R$ ${valorComJuros.toFixed(2)}`;
+            }
+        }
+
+        function finalizarPagamento() {
+            const hoje = new Date(dataPagamento.value);
+            const atraso = diasAtraso(conta.dataVencimento, hoje);
+            const valorComJuros = calcularValorFinal(conta.valor, atraso, conta.juros);
+
+            if (formaPagamento.value === 'parcelado') {
+                const totalParcelas = Number(numParcelas.value);
+                const parcela = Number(parcelaSelecionada.value);
+                const valorParcela = Math.round((valorComJuros / totalParcelas) * 100) / 100;
+
+                if (!conta.pagamentosParciais) conta.pagamentosParciais = [];
+                conta.pagamentosParciais[parcela - 1] = valorParcela;
+
+                const totalPago = conta.pagamentosParciais.reduce((a, b) => a + (b || 0), 0);
+                const restante = Math.round((valorComJuros - totalPago) * 100) / 100;
+
+                alert(`Você pagou R$ ${valorParcela.toFixed(2)}. Restam R$ ${restante.toFixed(2)} para quitar totalmente.`);
+
+                // Atualiza storage
+                lista[index] = conta;
+                localStorage.setItem(tipo === 'recebimento' ? 'recebimentos' : 'pagamentos', JSON.stringify(lista));
+                window.location.reload();
+
+            } else {
+                // Pagamento à vista
+                conta.pago = true;
+                lista[index] = conta;
+                localStorage.setItem(tipo === 'recebimento' ? 'recebimentos' : 'pagamentos', JSON.stringify(lista));
+                alert(`Você pagou R$ ${valorComJuros.toFixed(2)}. Conta quitada!`);
+                window.location.href = "inicial.html";
+            }
+        }
+
+        init();
+    </script>
+
+</body>
+
+</html>

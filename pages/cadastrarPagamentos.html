@@ -1,179 +1,66 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Cadastrar Pagamento</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <style>
-        header {
-            background-color: #ff7f27;
-            color: white;
-            padding: 12px;
-            font-size: 20px;
-        }
-
-        #voltar {
-            background: #cccccc;
-            padding: 6px 10px;
-            border-radius: 4px;
-            color: #000;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-
-        .caixa {
-            padding: 20px;
-            max-width: 700px;
-            margin: 20px auto;
-            background: #f5f5f5;
-            border-radius: 6px;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 6px;
-            display: inline-block;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        input[readonly] {
-            background: #e9e9e9;
-        }
-
-        .submitbutton {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .submitbutton:hover {
-            background-color: #45a049;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: flex-start;
-            gap: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Cadastrar Pagamento</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+header {background-color: #ff7f27;color: white;padding: 12px;font-size: 20px;}
+#voltar {background: #cccccc;padding: 6px 10px;border-radius: 4px;color: #000;text-decoration: none;margin-right: 10px;}
+.caixa {padding: 20px;max-width: 700px;margin: 20px auto;background: #f5f5f5;border-radius: 6px;}
+label {font-weight: 600;}
+input[readonly] {background: #e9e9e9;}
+.submitbutton {background-color: #4CAF50;color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;margin-top:10px;}
+.submitbutton:hover {background-color:#45a049;}
+</style>
 </head>
-
 <body>
+<header>
+    <a id="voltar" href="inicial.html">Voltar</a> Ambos
+</header>
+<h2 style="text-align:center;">Cadastrar Pagamento</h2>
+<div class="caixa">
+    <label>Fornecedor:</label><br>
+    <input type="text" id="fornecedor"><br><br>
+    <label>Item/Descrição:</label><br>
+    <input type="text" id="item"><br><br>
+    <label>Valor (R$):</label><br>
+    <input type="number" id="valor" step="0.01" min="0"><br><br>
+    <label>Data da Compra:</label><br>
+    <input type="date" id="dataCompra"><br><br>
+    <label>Data de Vencimento:</label><br>
+    <input type="date" id="dataVencimento"><br><br>
+    <label>Juros (% por dia) — OPCIONAL (padrão 0,5% ao dia):</label><br>
+    <input type="number" id="juros" step="0.01" min="0" placeholder="Ex: 0.5"><br><br>
+    <button class="submitbutton" onclick="salvarPagamento()">Salvar</button>
+</div>
+<script>
+function salvarPagamento(){
+    const fornecedor = document.getElementById("fornecedor").value.trim();
+    const item = document.getElementById("item").value.trim();
+    const valor = document.getElementById("valor").value;
+    const dataCompra = document.getElementById("dataCompra").value;
+    const dataVencimento = document.getElementById("dataVencimento").value;
+    let jurosInput = document.getElementById("juros").value;
 
-    <header>
-        <a id="voltar" href="inicial.html">Voltar</a>
-        Ambos
-    </header>
+    if(!fornecedor || !item || !valor || !dataCompra || !dataVencimento){
+        alert("Preencha todos os campos obrigatórios!");
+        return;
+    }
 
-    <h2 style="text-align:center;">Cadastrar Pagamento</h2>
+    let juros = jurosInput === '' ? 0.5 : Number(jurosInput);
+    if(isNaN(juros) || juros < 0) juros = 0.5;
 
-    <div class="caixa">
-        <label for="fornecedor">Fornecedor:</label>
-        <input type="text" id="fornecedor">
+    let pagamentos = JSON.parse(localStorage.getItem("pagamentos")) || [];
+    pagamentos.push({
+        fornecedor, item, valor:Number(valor), dataCompra, dataVencimento, juros,
+        valorPago:0, parcelas:1, parcelasPagas:[]
+    });
 
-        <label for="item">Item/Descrição:</label>
-        <input type="text" id="item">
-
-        <label for="valor">Valor (R$):</label>
-        <input type="number" id="valor" step="0.01" min="0">
-
-        <label for="dataCompra">Data da Compra:</label>
-        <input type="date" id="dataCompra">
-
-        <label for="dataVencimento">Data de Vencimento:</label>
-        <input type="date" id="dataVencimento">
-
-        <label for="juros">Juros (% por dia) — OPCIONAL (padrão 0,5% ao dia):</label>
-        <input type="number" id="juros" step="0.01" min="0" placeholder="Ex: 0.5">
-
-        <label for="valorFinal">Valor Final (calculado):</label>
-        <input type="text" id="valorFinal" readonly>
-
-        <div class="button-container">
-            <button class="submitbutton" id="btnCalcular">Calcular Valor Final</button>
-            <button class="submitbutton" onclick="salvarPagamento()">Salvar</button>
-        </div>
-    </div>
-
-    <script>
-        function formatMoney(v) {
-            return Number(v).toFixed(2);
-        }
-
-        function calcularValorFinal(valor, dataVencimento, jurosPercent) {
-            if (!valor || !dataVencimento) return valor || 0;
-            const hoje = new Date();
-            const venc = new Date(dataVencimento + 'T00:00:00');
-            const msPorDia = 1000 * 60 * 60 * 24;
-            let diasAtraso = Math.floor((hoje - venc) / msPorDia);
-            if (diasAtraso <= 0) return Number(valor);
-            const jurosDia = (jurosPercent === '' || jurosPercent === null || typeof jurosPercent === 'undefined')
-                ? 0.5 / 100
-                : Number(jurosPercent) / 100;
-            const valorFinal = Number(valor) * (1 + jurosDia * diasAtraso);
-            return Math.round(valorFinal * 100) / 100;
-        }
-
-        document.getElementById('btnCalcular').addEventListener('click', () => {
-            const valor = document.getElementById('valor').value;
-            const dataV = document.getElementById('dataVencimento').value;
-            const juros = document.getElementById('juros').value;
-            const vf = calcularValorFinal(valor, dataV, juros);
-            document.getElementById('valorFinal').value = formatMoney(vf);
-        });
-
-        function salvarPagamento() {
-            const fornecedor = document.getElementById("fornecedor").value.trim();
-            const item = document.getElementById("item").value.trim();
-            const valor = document.getElementById("valor").value;
-            const dataCompra = document.getElementById("dataCompra").value;
-            const dataVencimento = document.getElementById("dataVencimento").value;
-            let juros = document.getElementById("juros").value;
-
-            if (!fornecedor || !item || !valor || !dataCompra || !dataVencimento) {
-                alert("Preencha todos os campos obrigatórios!");
-                return;
-            }
-
-            if (juros === '' || juros === null || typeof juros === 'undefined') {
-                juros = 0.5;
-            } else {
-                juros = Number(juros);
-            }
-
-            const valorFinal = calcularValorFinal(valor, dataVencimento, juros);
-
-            let pagamentos = JSON.parse(localStorage.getItem("pagamentos")) || [];
-
-            pagamentos.push({
-                fornecedor,
-                item,
-                valor: Number(valor),
-                dataCompra,
-                dataVencimento,
-                juros,
-                valorFinal: Number(valorFinal),
-                pago: false
-            });
-
-            localStorage.setItem("pagamentos", JSON.stringify(pagamentos));
-            alert("Pagamento cadastrado!");
-            window.location.href = "inicial.html";
-        }
-    </script>
-
+    localStorage.setItem("pagamentos", JSON.stringify(pagamentos));
+    alert("Pagamento cadastrado!");
+    window.location.href="inicial.html";
+}
+</script>
 </body>
-
 </html>
