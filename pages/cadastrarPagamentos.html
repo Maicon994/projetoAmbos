@@ -72,33 +72,45 @@
         <input type="date" id="dataVencimento"><br><br>
         <label>Juros (% por dia) — OPCIONAL (padrão 0,5% ao dia):</label><br>
         <input type="number" id="juros" step="0.01" min="0" placeholder="Ex: 0.5"><br><br>
-        <button class="submitbutton" onclick="salvarPagamento()">Salvar</button>
+        <button id="salvar" class="submitbutton">Salvar</button>
     </div>
-    <script>
-        function salvarPagamento() {
-            const fornecedor = document.getElementById("fornecedor").value.trim();
-            const item = document.getElementById("item").value.trim();
-            const valor = document.getElementById("valor").value;
-            const dataCompra = document.getElementById("dataCompra").value;
-            const dataVencimento = document.getElementById("dataVencimento").value;
-            let jurosInput = document.getElementById("juros").value;
+    <script type="module">
+        import { db } from "../scripts/firebase.js"
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-            if (!fornecedor || !item || !valor || !dataCompra || !dataVencimento) {
+        document.getElementById("salvar").addEventListener("click", salvarPagamento);
+
+        async function salvarPagamento() {
+
+
+            const dados = {
+                fornecedor: document.getElementById("fornecedor").value.trim(),
+                item: document.getElementById("item").value.trim(),
+                valor: document.getElementById("valor").value,
+                dataCompra: document.getElementById("dataCompra").value,
+                dataVencimento: document.getElementById("dataVencimento").value,
+                juros: document.getElementById("juros").value
+            }
+
+
+
+            if (!dados.fornecedor || !dados.item || !dados.valor || !dados.dataCompra || !dados.dataVencimento) {
                 alert("Preencha todos os campos obrigatórios!");
                 return;
             }
 
-            let juros = jurosInput === '' ? 0.5 : Number(jurosInput);
-            if (isNaN(juros) || juros < 0) juros = 0.5;
+            dados.juros = dados.juros === '' ? 0.5 : Number(dados.juros);
+            if (isNaN(dados.juros) || dados.juros < 0) dados.juros = 0.5;
 
-            let pagamentos = JSON.parse(localStorage.getItem("pagamentos")) || [];
-            pagamentos.push({
-                fornecedor, item, valor: Number(valor), dataCompra, dataVencimento, juros,
-                valorPago: 0, parcelas: 1, parcelasPagas: []
-            });
+            try {
+                const ref = await addDoc(collection(db, "pagamentos"), dados)
+                console.log("ID do documento", ref.id)
+                alert("Pagamento cadastrado!");
+            } catch (e) {
+                console.log("Erro:", e)
+                alert("Erro ao cadastrar pagamento.");
 
-            localStorage.setItem("pagamentos", JSON.stringify(pagamentos));
-            alert("Pagamento cadastrado!");
+            }
             window.location.href = "inicial.html";
         }
     </script>

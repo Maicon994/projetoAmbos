@@ -114,8 +114,6 @@
                     <th>Data Vencimento</th>
                     <th>Dias Atraso</th>
                     <th>Juros (%/dia)</th>
-                    <th>Valor Final</th>
-                    <th>Pago?</th>
                 </tr>
             </table>
         </div>
@@ -126,7 +124,10 @@
         <button class="btn excluir" onclick="excluirSelecionado()">Excluir seleção</button>
     </div>
 
-    <script>
+    <script type="module">
+        import { db } from "../scripts/firebase.js"
+        import { collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
         function diasAtrasoPara(dataVencimento) {
             const hoje = new Date();
             const venc = new Date(dataVencimento + 'T00:00:00');
@@ -141,15 +142,18 @@
             return Math.round(Number(valor) * (1 + jurosDia * diasAtraso) * 100) / 100;
         }
 
-        function carregarPagamentos() {
-            const lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+        async function carregarPagamentos() {
+            const dadosBanco = await getDocs(collection(db, "pagamentos"))
+            const lista = []
+            for (const doc of dadosBanco.docs) {
+                lista.push({ id: doc.id, ...doc.data() })
+            }
+
             const tabela = document.getElementById("tabelaPagamentos");
             tabela.querySelectorAll("tr.row-item")?.forEach(r => r.remove());
 
             lista.forEach((p, index) => {
                 const dias = diasAtrasoPara(p.dataVencimento);
-                const valorFinalCalc = calcularValorFinal(p.valor, dias, p.juros);
-                p.valorFinal = valorFinalCalc;
 
                 tabela.insertAdjacentHTML('beforeend', `
             <tr class="row-item ${p.pago ? 'pago-row' : ''}">
@@ -160,22 +164,8 @@
                 <td>${p.dataVencimento}</td>
                 <td>${dias}</td>
                 <td>${Number(p.juros).toFixed(2)}%</td>
-                <td>R$ ${Number(valorFinalCalc).toFixed(2)}</td>
-                <td><input type="checkbox" class="paid-toggle" data-index="${index}" ${p.pago ? 'checked' : ''}></td>
             </tr>
         `);
-            });
-
-            localStorage.setItem("pagamentos", JSON.stringify(lista));
-
-            document.querySelectorAll('.paid-toggle').forEach(el => {
-                el.addEventListener('change', (e) => {
-                    const idx = Number(e.target.dataset.index);
-                    let lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
-                    lista[idx].pago = e.target.checked;
-                    localStorage.setItem("pagamentos", JSON.stringify(lista));
-                    carregarPagamentos();
-                });
             });
         }
 
@@ -184,7 +174,6 @@
             return [...checks].map(c => parseInt(c.dataset.index));
         }
 
-        // NOVA FUNÇÃO: leva para pagar.html
         function irParaPagamento() {
             const selecionados = getSelecionados();
             if (selecionados.length !== 1) {
@@ -195,16 +184,25 @@
             window.location.href = `pagar.html?tipo=pagamento&index=${idx}`;
         }
 
-        function excluirSelecionado() {
-            let lista = JSON.parse(localStorage.getItem("pagamentos")) || [];
+        async function excluirSelecionado() {
             const selecionados = getSelecionados();
             if (selecionados.length === 0) { alert("Selecione ao menos 1 item."); return; }
             if (!confirm("Tem certeza que deseja excluir os itens selecionados?")) return;
-            lista = lista.filter((item, index) => !selecionados.includes(index));
-            localStorage.setItem("pagamentos", JSON.stringify(lista));
+
+            let id = selecionados.pop();
+
+            try {
+                const documentoDeletar = doc(db, "pagamentos", id)
+                await deleteDoc(documentoDeletar)
+                console.log("Conta com ID" + id + "foi excluída")
+            } catch (error) {
+                console.log("Erro ao excluir conta", error)
+                alert("Erro ao excluir conta. Tente novamente mais tarde.")
+                return false;
+            }
+
             carregarPagamentos();
         }
-
         carregarPagamentos();
     </script>
 
